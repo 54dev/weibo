@@ -28,9 +28,16 @@ class SessionController extends Controller
         ]);
 
         if(Auth::attempt($credentials, $request->has('remember'))){
-            session()->flash('success','welcome back');
-            $fallback = route('users.show', Auth::user());
-            return redirect()->intended($fallback);
+            if(Auth::user()->activated){
+                session()->flash('success','welcome back');
+                $fallback = route('users.show', Auth::user());
+                return redirect()->intended($fallback);
+            } else {
+                Auth::logout();
+                session()->flash('warning','no activated,check your email');
+                return redirect('/');
+            }
+
         }else{
             session()->flash('danger','sorry,no empty');
             return redirect()->back()->withInput();
@@ -38,6 +45,8 @@ class SessionController extends Controller
 
         return;
     }
+
+
 
     public function destory()
     {
